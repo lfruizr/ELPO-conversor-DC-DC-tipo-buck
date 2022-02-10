@@ -1,0 +1,48 @@
+// Potentiometer is connected to GPIO 36 
+const int Vref = 36;
+const int PWM_out = 32;
+const int PWM_freq = 10000;
+const int PWM_chnl = 0;
+const int PWM_res = 12;
+
+// variable for storing the potentiometer value
+float potValue = 0;
+float v = 0;
+// varible que almacena el valor inicial del PWM
+boolean inicio = 0; 
+float PWM_ini = 0;
+
+void setup() {
+  Serial.begin(115200);
+  ledcSetup(PWM_chnl, PWM_freq, PWM_res);
+  ledcAttachPin(PWM_out, PWM_chnl);
+  delay(100);
+}
+
+void loop() 
+{
+  // Reading potentiometer value
+  potValue = analogRead(Vref); 
+  if (inicio == 0){
+      PWM_ini = potValue;
+      inicio = 1;
+    }
+  
+  if (potValue < 3164 && (PWM_ini < 4095))
+  PWM_ini = PWM_ini - 20;
+      
+  if (potValue > 3040 && (PWM_ini > 0))
+  PWM_ini = PWM_ini + 20;
+
+  if ((PWM_ini > 5000) || (PWM_ini < -500))
+  PWM_ini = 2000;
+  
+  v = (potValue/4095)*6.6;
+  Serial.print(PWM_ini);
+  Serial.print(" ");
+  Serial.print(v);
+  Serial.print(" ");
+  Serial.println(potValue);
+  ledcWrite(PWM_chnl, PWM_ini);
+  delay(100);
+}
